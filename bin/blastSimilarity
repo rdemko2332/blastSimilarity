@@ -116,7 +116,7 @@ print LOG "# Sum: subject_Identifier:score:pvalue:minSubjectStart:maxSubjectEnd:
 print LOG "#   HSP: subject_Identifier:numberIdentical:numberPositive:matchLength:score:PValue:subjectStart:subjectEnd:queryStart:queryEnd:isReversed:readingFrame\n\n";
  
 while(<F>){
-  if(/^>(\S+)/){  ##check to see that this is the accession!!
+  if(/^\>(\S+)/){  ##check to see that this is the accession!!
    &processEntry($cmd, $tmpid, $seq, $program, $tempfile) unless $tmpid eq "";
     $tmpid = $1;
     $seq = "";
