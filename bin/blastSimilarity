@@ -132,19 +132,21 @@ sub processEntry {
     print LOG "DINGDO/n";  
     system("$cmd > out.txt");
     ($validOutput, $noHits) =
-               &checkOutput($accession);
+	&checkOutput($accession);
   } while (!$validOutput && ($try++ < $retry));
 
   if (!$validOutput) {
-    if($doNotExitOnBlastFailure){
+      if($doNotExitOnBlastFailure){
       print OUT "\>$accession (ERROR: BLAST failed ($try times).";
       return; 
-    }
-  }
-  if ($noHits) {
-      print LOG "HITSFOUND\n";
-      print OUT "\>$accession (0 subjects)\n" unless $printSimSeqsFile;
     } else {
+	system("cat out.txt > blast.out");
+	print LOG "Failed ($try times) running '$cmd'";
+  }
+  }
+  if ($noHits==1) {
+      print OUT "\>$accession (0 subjects)\n" unless $printSimSeqsFile;
+  } else {
 	&analyzeBlast($accession);
 	print LOG "DINGVALID/n";
   }
@@ -164,15 +166,13 @@ sub checkOutput {
         print LOG "\>$accession blast failed with: $res \n";
 	$validOutput = 1;
 	$noHits = 1;
-    } else {
-       if (`grep "Sequences producing" out.txt`) {
+    } elsif (`grep "Sequences producing" out.txt`) {
          $validOutput = 1;
 	 $noHits = 0;
-	 print LOG "DING5\n";
-       }
+	 print LOG "DING5\n";  
     }
     print LOG "DINGCHECK\n";
-  }
+}
   
 sub analyzeBlast{
   my($accession) = @_;
@@ -257,7 +257,7 @@ sub printSSFile {
     my $sTaxAbbrev = shift(@s);
 
     my $perIdent = sprintf("%.0f", (($s->getTotalIdentities()/$s->getTotalMatchLength())*100));
-    my $perMatch = sprintf("%.0f", (int(($s->getLength() < $s->getQueryLength() ? $s->getNonoverlappingSubjectMatchLength() / $s->getLength() : $s->getNonoverlappingQueryMatchLength() / $s->getQueryLength()) * 10000) / 100 ));
+    my $perMatch = sprintf("%.0f", (int(($s->getLength() < $s->getQueryLength() ? $s->getNonoverlappingSubjectMatchLength() / $s->getLength() : $s->getNonoverlappingQueryMatchLength() / $s->getQueryLength()) * 10000) / 100));
 
     # accessions must include taxon abbrev prefix
     print OUT "$accession $s_accession $qTaxAbbrev $sTaxAbbrev $mant $exp $perIdent $perMatch\n";
