@@ -9,8 +9,7 @@ COPY /bin/* /usr/bin/
 RUN mv /usr/bin/blastall /usr/bin/ncbi-blast-2.13.0+/bin &&  cd /usr/bin/ncbi-blast-2.13.0+/bin  &&  chmod +x *
 RUN cd /usr/bin/ && chmod +x blastSimilarity
 ENV PERL5LIB=/usr/bin/
-COPY /data/* /work/
-RUN makeblastdb -in newdb.fasta -dbtype prot
+
 
 
 
