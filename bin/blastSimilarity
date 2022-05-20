@@ -60,10 +60,6 @@ if($saveAllBlastFiles eq "true" || $saveGoodBlastFiles eq "true"){
     my $pg = basename($program);
     $fileExtension = "$db\_$pg";
   }
-  die "ERROR: you must specify --blastFileDir in order to save blast files\n" unless $blastFileDir;
-  if(!  -e "$blastFileDir"){
-    system("mkdir $blastFileDir") or die "cannot mkdir $blastFileDir";
-  }
 }
 
 open(OUT, ">$dataFile") or &error("cannot open output file $dataFile for writing");
@@ -190,9 +186,10 @@ sub analyzeBlast{
   }
 
   if($doNotParse eq "true"){ ##in this case must  be saving all blast files...
-    my $blastOutFile = "$blastFileDir/$accession.$fileExtension";
-    system("cat out.txt > $blastOutFile"); 
-    system("gzip -f $blastOutFile");
+    my $blastOutFile = "$accession.$fileExtension";
+    system("touch '$blastOutFile'");
+    system("cat out.txt > '$blastOutFile'");
+    system("gzip -f '$blastOutFile'");
     return;
   }
   print LOG "DINGBLAST3\n";
@@ -214,11 +211,12 @@ sub analyzeBlast{
     print LOG "DING7\n";
   }
 
-  if(($saveAllBlastFiles eq "true" && !$doNotParse eq "true") || ($saveGoodBlastFiles eq "true" && $blast->getSubjectCount() >= 1)){
-    open(B,">$blastFileDir/$accession.$fileExtension");
-    print B @blastn_out;
-    close B;
-    system("gzip -f $blastFileDir/$accession.$fileExtension");
+  if(($saveAllBlastFiles eq "true" && $doNotParse eq "false") || ($saveGoodBlastFiles eq "true" && $blast->getSubjectCount() >= 1)){
+    my $blastOutFile = "$accession.$fileExtension";
+    print LOG "DINGSAVEGOOD";  
+    system("touch $blastOutFile");  
+    #system("cat out.txt > $blastOutFile"); 
+    #system("gzip -f $blastOutFile");
   }
   }
 
