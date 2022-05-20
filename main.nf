@@ -10,11 +10,11 @@ process blastSimilarity {
    """
    cat $params.databaseFasta > newdb.fasta
    makeblastdb -in newdb.fasta -dbtype prot
-   blastSimilarity --regex $params.regex --pValCutoff  $params.pValCutoff --lengthCutoff $params.lengthCutoff --percentCutoff  $params.percentCutoff --blastBinDir /usr/bin/ncbi-blast-2.13.0+/bin --blastProgram  $params.blastProgram --database newdb.fasta --seqFile subset.fa  --blastParams $params.blastParams --blastVendor $params.blastVendor
+   blastSimilarity --regex $params.regex --pValCutoff  $params.pValCutoff --lengthCutoff $params.lengthCutoff --percentCutoff  $params.percentCutoff --blastBinDir /usr/bin/ncbi-blast-2.13.0+/bin --blastProgram  $params.blastProgram --database newdb.fasta --seqFile subset.fa  --blastParams $params.blastParams --blastVendor $params.blastVendor --doNotParse $params.doNotParse --printSimSeqsFile $params.printSimSeqsFile --saveAllBlastFiles $params.saveAllBlastFiles --saveGoodBlastFiles $params.saveGoodBlastFiles --doNotExitOnBlastFailure $params.doNotExitOnBlastFailure --blastFileDir $params.blastFileDir --fileExtension $params.fileExtension
    """
 }
 
-results = output_qch.collectFile(storeDir: params.outputDir, name: "blastSimilarity.out")
-results = log_qch.collectFile(storeDir: params.outputDir, name: "blastSimilarity.log")
+results = output_qch.collectFile(storeDir: params.outputDir, name: params.dataFile)
+results = log_qch.collectFile(storeDir: params.outputDir, name: params.logFile)
 
 

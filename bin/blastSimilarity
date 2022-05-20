@@ -31,12 +31,12 @@ my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsbla
             "blastFileDir=s" => \$blastFileDir,
             "fileExtension=s" => \$fileExtension,
             "blastParamsFile=s" => \$blastParamsFile,
-            "saveAllBlastFiles!" => \$saveAllBlastFiles,
-            "saveGoodBlastFiles!" => \$saveGoodBlastFiles,
-            "doNotParse!" => \$doNotParse,
-            "doNotExitOnBlastFailure!" => \$doNotExitOnBlastFailure,
+            "saveAllBlastFiles=s" => \$saveAllBlastFiles,
+            "saveGoodBlastFiles=s" => \$saveGoodBlastFiles,
+            "doNotParse=s" => \$doNotParse,
+            "doNotExitOnBlastFailure=s" => \$doNotExitOnBlastFailure,
 	    "blastBinDir=s" => \$blastBinDir,
-	    "printSimSeqsFile!" => \$printSimSeqsFile
+	    "printSimSeqsFile=s" => \$printSimSeqsFile
             );
 die "Usage: blastSimilarity --regex=<regular expression following ^\> of defline...ie '(\S+)'> --pValCutoff=<float> --lengthCutoff=<int> --percentCutoff=<int> --outputType=(summary|span|both) --blastBinDir=<directory containing blast binaries (if 'default' then must be in \$PATH)> --blastProgram=<blastprogram> --database=<blast database> --seqFile=<sequenceFile>  --trackingFile=<filename to track progress> --blastParams 'extra blast parameters' --adjustMatchLength! --saveAllBlastFiles! --blastFileDir <directory on server to put the blast files> --saveGoodBlastFiles! --fileExtension [.database_blastProgram] --doNotParse! --doNotExitOnBlastFailure! --printSimSeqsFile!\n" unless ( $program && $database && $seqFile && $blastParamsFile);
 
@@ -51,10 +51,10 @@ $regex = $regex ? $regex : '(\S+)';
 
 my $blastParams = &parseBlastParams($blastParamsFile);
 
-if($doNotParse){
-  $saveAllBlastFiles = 1;
+if($doNotParse eq "true"){
+  $saveAllBlastFiles = "true";
 }
-if($saveAllBlastFiles || $saveGoodBlastFiles){
+if($saveAllBlastFiles eq "true" || $saveGoodBlastFiles eq "true"){
   if(!$fileExtension){
     my $db = basename($database);
     my $pg = basename($program);
@@ -136,7 +136,7 @@ sub processEntry {
   } while (!$validOutput && ($try++ < $retry));
 
   if (!$validOutput) {
-      if($doNotExitOnBlastFailure){
+      if($doNotExitOnBlastFailure eq "true"){
       print OUT "\>$accession (ERROR: BLAST failed ($try times).";
       return; 
     } else {
@@ -145,7 +145,7 @@ sub processEntry {
   }
   }
   if ($noHits==1) {
-      print OUT "\>$accession (0 subjects)\n" unless $printSimSeqsFile;
+      print OUT "\>$accession (0 subjects)\n" unless ($printSimSeqsFile eq "true");
   } else {
 	&analyzeBlast($accession);
 	print LOG "DINGVALID/n";
@@ -189,7 +189,7 @@ sub analyzeBlast{
       print LOG "DINGBLAST2\n";
   }
 
-  if($doNotParse){ ##in this case must  be saving all blast files...
+  if($doNotParse eq "true"){ ##in this case must  be saving all blast files...
     my $blastOutFile = "$blastFileDir/$accession.$fileExtension";
     system("cat out.txt > $blastOutFile"); 
     system("gzip -f $blastOutFile");
@@ -201,7 +201,7 @@ sub analyzeBlast{
   print LOG "DINGBLAST\n";
   $blast->parseBlast($lengthCutoff,$percentCutoff,$pValCutoff,$regex,\@blastn_out,$remMaskedRes,($program =~ /rpsblast/ ? 1 : undef));
   print LOG "PROBNOT\n";
-  if ($printSimSeqsFile){
+  if ($printSimSeqsFile eq "true"){
     &printSSFile($accession, $blast);
     return;
   }
@@ -214,7 +214,7 @@ sub analyzeBlast{
     print LOG "DING7\n";
   }
 
-  if(($saveAllBlastFiles && !$doNotParse) || ($saveGoodBlastFiles && $blast->getSubjectCount() >= 1)){
+  if(($saveAllBlastFiles eq "true" && !$doNotParse eq "true") || ($saveGoodBlastFiles eq "true" && $blast->getSubjectCount() >= 1)){
     open(B,">$blastFileDir/$accession.$fileExtension");
     print B @blastn_out;
     close B;
