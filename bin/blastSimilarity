@@ -215,8 +215,8 @@ sub analyzeBlast{
     my $blastOutFile = "$accession.$fileExtension";
     print LOG "DINGSAVEGOOD";  
     system("touch $blastOutFile");  
-    #system("cat out.txt > $blastOutFile"); 
-    #system("gzip -f $blastOutFile");
+    system("cat out.txt > '$blastOutFile'");
+    system("gzip -f '$blastOutFile'");
   }
   }
 
