@@ -194,7 +194,8 @@ sub analyzeBlast{
   }
   print LOG "DINGBLAST3\n";
   my $blast = BlastAnal->new($debug);
-  my @blastn_out = `cat out.txt`;
+  my @blastn_out = `$cmd`;
+  print LOG "\n OUTPUT \n @blastn_out \n";
   print LOG "DINGBLAST\n";
   $blast->parseBlast($lengthCutoff,$percentCutoff,$pValCutoff,$regex,\@blastn_out,$remMaskedRes,($program =~ /rpsblast/ ? 1 : undef));
   print LOG "PROBNOT\n";

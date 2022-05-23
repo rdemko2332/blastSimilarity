@@ -45,9 +45,11 @@ sub new {
 
 ## takes in a blast result as an array and builds the entire datastructure
 sub parseBlast{
+  system("touch blastAnal.log");
+  open(LOG,">blastAnal.log");
   my $self = shift;
   my($minLength,$minPercent,$minPvalue,$regex,$blast,$remMaskedFromLen,$rpsblast,$minPercentLength) = @_;
-  print STDERR "BlastAnal->parseBlast($minLength,$minPercent,$minPvalue,$regex,$blast,$remMaskedFromLen,$rpsblast,$minPercentLength)\n" if $debug;
+  print LOG "BlastAnal->parseBlast($minLength,$minPercent,$minPvalue,$regex,$blast,$remMaskedFromLen,$rpsblast,$minPercentLength)\n";
   $self->{minLength} = $minLength;
   $self->{minPercent} = $minPercent;
   $self->{minPvalue} = $minPvalue;
@@ -71,44 +73,46 @@ sub parseBlast{
     #    print STDERR $_;
     if (/^(\S*BLAST\S+)/){   ##gets the algorighm used for the query...
       my $algo = $1;
-      print STDERR "algorithm = $algo\n" if $debug;
+      print LOG "algorithm = $algo\n";
       if($algo =~ /BLASTX/i){
         $parseType = 1;
       }else{
         $parseType = 0;
       }
-      print STDERR "ParseType='$parseType'\n" if $debug;
+      print LOG "ParseType='$parseType'\n";
     }
     if (/^Query=\s*(\S+)/) {
       $self->{queryName} = $1;	##query name/id
-    } elsif (/^\s+\((\S+)\s+letters/) {
-      $self->setQueryLength($1); ##query length
+    } elsif (/^Length=(\S+)/) {
+	print LOG "Letters Trigger\n";
+	$self->setQueryLength($1); ##query length
+	print LOG "$1\n";
     }
-    if (/^\>$regex/ || /ctxfactor/ || /^Lambda/) { ##ctxfactor catches the last one...Lambda last of rpsblast
+    if (/^\>\s*(\S+)/ || /ctxfactor/ || /^Lambda/) { ##ctxfactor catches the last one...Lambda last of rpsblast
       my $sbjctId;
       $desc = "";
-      if (/^\>$regex/){
+      if (/^\>\s*(\S+)/){
         $sbjctId = $1 ? $1 : $2;
       }else{
-        print STDERR "$self->{queryName}: Unable to match subject using regex '$regex' on:\n  $_" unless (/ctxfactor/ || /^Lambda/);
+        print "$self->{queryName}: Unable to match subject using regex '$regex' on:\n  $_" unless (/ctxfactor/ || /^Lambda/);
       }
 
-      print STDERR "Matching subjectId = $sbjctId\n" if $debug;
+      print LOG "Matching subjectId = $sbjctId\n";
       ##      print STDERR "REGEX matched $_";
       if ($haveQStart) {
-        print STDERR "Have last QStart:", $sbjct->getID()," SS:$sStart,SE:$sEnd, QS:$qStart, QE:$qEnd, Length=$matchLength, Percent=$matchPercent, pValue=$pValue, Frame=$frame\n" if $debug == 1 && $sbjct;
+        print "Have last QStart:", $sbjct->getID()," SS:$sStart,SE:$sEnd, QS:$qStart, QE:$qEnd, Length=$matchLength, Percent=$matchPercent, pValue=$pValue, Frame=$frame\n" if $debug == 1 && $sbjct;
         ##have the complete HSP...
         ##want to add only if meets minimum reqs....do this on an HSP basis...
         #	print $sbjct->getID()," $sStart,$sEnd: Length=$matchLength, Percent=$matchPercent, pValue=$pValue\n";
         if ($matchLength >= $minLength && $matchPercent >= $minPercent && $pValue <= $minPvalue) {
-          print STDERR "Match meets reqs\n" if $debug;
+          print LOG "Match meets reqs\n";
           if($remMaskedFromLen){  ##want to remove Xs from the match length....
 #            print STDERR "removing X from match\n";
 #            print STDERR "Before: $queryMatch\n";
             $queryMatch =~ s/X//g;
 #            print STDERR "After: $queryMatch\n";
             if(length($queryMatch) < 10){ ##don't remove if final length < 10
-              print STDERR "RemoveMaskedResiduesFromLength: error...length = ".length($queryMatch)." following removal of X's\n";
+              print "RemoveMaskedResiduesFromLength: error...length = ".length($queryMatch)." following removal of X's\n";
             }else{
 #              print "match before $matchLength\n";
               $matchLength = length($queryMatch);
@@ -121,7 +125,7 @@ sub parseBlast{
         $haveSStart = 0;
       } 
       my $shortSeq = defined $sbjct ? $sbjct->getQueryLength() < $sbjct->getLength() ? $sbjct->getQueryLength() : $sbjct->getLength() : 0;
-##      print STDERR "QueryLength: ".$sbjct->getQueryLength().", subjectLength: ".$sbjct->getLength().", shortest sequence is $shortSeq long\n" if defined $sbjct;
+      print LOG "QueryLength: ".$sbjct->getQueryLength().", subjectLength: ".$sbjct->getLength().", shortest sequence is $shortSeq long\n" if defined $sbjct;
       if (defined $sbjct && $sbjct->countHSPs() >= 1 && $sbjct->getTotalHSPLength() > $minPercentLength * $shortSeq ) {
         $self->addSubject($sbjct);
       }
@@ -132,7 +136,7 @@ sub parseBlast{
       
       ##      print STDERR "New Subject $sbjctId\n";
       $sbjct = Subject->new($sbjctId) if $sbjctId;
-
+      print LOG "DING\n" if $sbjctId;
       ##lets get the description here could be on multiple lines so need to set something to take care of this..
       if(/^\>\S+\s(.*)$/){
         $desc = $1;
@@ -141,8 +145,9 @@ sub parseBlast{
       }
       
     }
-    if (/^\s+Length\s=\s(\S+)/) {
+    if (/^Length=(\S+)/) {
       if($sbjct){
+        print LOG "SubLen Trigger\n";	    
         $inDesc = 0;
         $sbjct->setDescription($desc);  ##set the description
         my $sbjctLength = $1;
@@ -208,8 +213,8 @@ sub parseBlast{
       $dir = $frame =~ /^\+/ ? 1 : 0;
     }
 
-    if (/^Query:\s+(\d+)\s(.*)\s(\d+)\s*$/) {
-      print STDERR "Matching query: $1 $3\n" if $debug;
+    if (/^Query\s+(\d+)\s(.*)\s(\d+)\s*$/) {
+      print LOG "Matching query: $1 $3\n";
       if ($haveQStart == 0) {
         $queryMatch = "";
         $qStart = $1; 
@@ -219,7 +224,7 @@ sub parseBlast{
       my $tmpQMatch = $2;
       $tmpQMatch =~ s/\s//g;  ##gets rid of any spaces
       $queryMatch .= $tmpQMatch;
-    } elsif (/^Sbjct:\s+(\d+)\s.*\s(\d+)\s*$/) {
+    } elsif (/^Sbjct\s+(\d+)\s.*\s(\d+)\s*$/) {
       if ($haveSStart == 0) {
         $sStart = $1; 
         $haveSStart = 1;

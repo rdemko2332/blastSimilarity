@@ -15,6 +15,7 @@ use Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(new setID getID setLength getLength setQueryLength getQueryLength setDescription getDescription getLinesOfLength getUnbrokenSubstring addHSP getHSPs getPValue getTotalHSPLength  getNonoverlappingQueryMatchLength getNonoverlappingSubjectMatchLength getTotalHSPPercent getTotalIdentities getTotalMatchLength getTotalPositives  getEndsMissed  getMinQueryStart getMaxQueryEnd getMinSubjectStart getMaxSubjectEnd  getQuery5endMis getQuery3endMis getQueryEndsMissed getSubjectEndsMissed getSubject5endMis getSubject3endMis  getBestHSPLength getBestHSP getBestHSPPercent  getTotalQueryGaps getTotalSubjectGaps getLongestHsp getGoodMatch getConsistentEnds checkRepeatMaskedLength getSubjectStats getNeighborStats getSimilaritySummary  getSimilaritySpans getSummaryStats compareQueryVsSubject getHSPsFromIDArray getHSPFromID setHSPs countHSPs getSubjectDirection removeWrongOrientHSPs countGoodHSPs getGoodHSPsBySubjectStart  getGoodHSPsByQueryStart  getHSPsBySubjectStart getHSPsByQueryStart checkOrderConsistency checkOrientationConsistency checkConsistency  countContainedQueryHSPs countContainedSubjectHSPs checkQueryGaps  checkSubjectGaps getConsistentGeneModel checkGoodCGM getFirstCorrectOrientedHSP getLastCorrectOrientedHSP compareHSPConsistency getBestCGM getPercentHSPsCoveredByCGM getCGMcoverage getMaxForwardCoverage getPercentCGMCoverage  getConsistentParents toString);
 
+use HSP;
 use strict;
 
 my $debug = 0;
@@ -111,7 +112,7 @@ sub getUnbrokenSubstring {
 sub addHSP{
   my $self = shift;
   $self->{"numHSPs"}++;		##count the number of hsps
-	my $hsp =  CBIL::Bio::Blast::HSP->new($self->getLength(),$self->{"numHSPs"},@_);
+	my $hsp =  HSP->new($self->getLength(),$self->{"numHSPs"},@_);
   $self->{"hspHash"}->{$self->{"numHSPs"}} = $hsp;
   push(@{$self->{"hsp"}},$hsp);
 

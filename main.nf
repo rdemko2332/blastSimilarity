@@ -8,7 +8,8 @@ process blastSimilarity {
    output:
    path 'blastSimilarity.out' into output_qch
    path 'blastSimilarity.log' into log_qch
-   path '*.gz*' optional true into test_qch
+   path '*.gz*' optional true into zip_qch
+   path 'blastAnal.log' optional true into out_qch
    """
    cat $params.databaseFasta > newdb.fasta
    makeblastdb -in newdb.fasta -dbtype prot
@@ -18,4 +19,5 @@ process blastSimilarity {
 
 results = output_qch.collectFile(storeDir: params.outputDir, name: params.dataFile)
 logResults = log_qch.collectFile(storeDir: params.outputDir, name: params.logFile)
-testResults = test_qch.collectFile(storeDir: params.outputDir)
+zipResults = zip_qch.collectFile(storeDir: params.outputDir)
+outResults = out_qch.collectFile(storeDir: params.outputDir)
