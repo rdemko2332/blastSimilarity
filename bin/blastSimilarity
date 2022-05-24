@@ -206,10 +206,12 @@ sub analyzeBlast{
   }
 
   if($doNotParse eq "true"){ ##in this case must  be saving all blast files...
-    my $blastOutFile = "$accession.$fileExtension";
+    my $blastOutFile = "$accession";
     system("touch '$blastOutFile'");
     system("cat out.txt > '$blastOutFile'");
     system("gzip -f '$blastOutFile'");
+    system("/usr/bin/fixZip.pl -string '$blastOutFile.gz'");
+    system("rm '$blastOutFile.gz'");
     return;
   }
   print LOG "DINGBLAST3\n";
