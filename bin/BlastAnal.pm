@@ -83,7 +83,7 @@ sub parseBlast{
     }
     if (/^Query=\s*(\S+)/) {
       $self->{queryName} = $1;	##query name/id
-    } elsif (/^Length=(\S+)/) {
+    } elsif (/^Length=(\S+)/ || /^\s*\((\S*)\s*letters/) {
 	print LOG "Letters Trigger\n";
 	$self->setQueryLength($1); ##query length
 	print LOG "$1\n";
@@ -145,7 +145,7 @@ sub parseBlast{
       }
       
     }
-    if (/^Length=(\S+)/) {
+    if (/^\s*Length\s*=\s*(\S+)/) {
       if($sbjct){
         print LOG "SubLen Trigger\n";	    
         $inDesc = 0;
@@ -157,7 +157,7 @@ sub parseBlast{
       }
       ##end remaining calculations
     }
-    if (/^\s*Score\s*=\s*(\d+).*?=\s(\S+)/ || ($rpsblast && /^\s*Score\s*=\s*\d+\sbits\s\((\d+).*=\s(\S+)$/)) {
+    if (/^\s*Score\s*=\s*\d+\sbits\s\((\d+).*=\s(\S+)/ || /^\s*Score\s*=\s*(\d+).*=\s(\S+)/) {
       my $tmpScore = $1;
       my $tmpValue = $2;
       $tmpValue =~ s/,//g;
@@ -213,7 +213,7 @@ sub parseBlast{
       $dir = $frame =~ /^\+/ ? 1 : 0;
     }
 
-    if (/^Query\s+(\d+)\s(.*)\s(\d+)\s*$/) {
+    if (/^Query\s+(\d+)\s(.*)\s(\d+)\s*$/ || /^Query:\s+(\d+)\s(.*)\s(\d+)\s*$/) {
       print LOG "Matching query: $1 $3\n";
       if ($haveQStart == 0) {
         $queryMatch = "";
@@ -224,7 +224,7 @@ sub parseBlast{
       my $tmpQMatch = $2;
       $tmpQMatch =~ s/\s//g;  ##gets rid of any spaces
       $queryMatch .= $tmpQMatch;
-    } elsif (/^Sbjct\s+(\d+)\s.*\s(\d+)\s*$/) {
+    } elsif (/^Sbjct\s+(\d+)\s.*\s(\d+)\s*$/ || /^Sbjct:\s+(\d+)\s.*\s(\d+)\s*$/) {
       if ($haveSStart == 0) {
         $sStart = $1; 
         $haveSStart = 1;
