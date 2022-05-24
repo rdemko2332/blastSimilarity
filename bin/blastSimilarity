@@ -15,7 +15,7 @@ $| = 1;
 my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsblast,
     $database,$seqFile,$blast_version,$startNumber,$stopNumber,$dataFile,$remMaskedRes,
     $saveAllBlastFiles,$blastFileDir,$saveGoodBlastFiles,$doNotParse,$fileExtension,
-    $blastParamsFile, $doNotExitOnBlastFailure, $blastVendor, $printSimSeqsFile,$blastBinDir, $validOutput);
+    $blastParamsFile, $doNotExitOnBlastFailure, $blastVendor, $printSimSeqsFile,$blastBinDir, $validOutput, $databaseType);
 
 &GetOptions("regex=s" => \$regex, 
             "pValCutoff=f" => \$pValCutoff, 
@@ -36,7 +36,8 @@ my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsbla
             "doNotParse=s" => \$doNotParse,
             "doNotExitOnBlastFailure=s" => \$doNotExitOnBlastFailure,
 	    "blastBinDir=s" => \$blastBinDir,
-	    "printSimSeqsFile=s" => \$printSimSeqsFile
+	    "printSimSeqsFile=s" => \$printSimSeqsFile,
+	    "databaseType=s" => \$databaseType
             );
 die "Usage: blastSimilarity --regex=<regular expression following ^\> of defline...ie '(\S+)'> --pValCutoff=<float> --lengthCutoff=<int> --percentCutoff=<int> --outputType=(summary|span|both) --blastBinDir=<directory containing blast binaries (if 'default' then must be in \$PATH)> --blastProgram=<blastprogram> --database=<blast database> --seqFile=<sequenceFile>  --trackingFile=<filename to track progress> --blastParams 'extra blast parameters' --adjustMatchLength! --saveAllBlastFiles! --blastFileDir <directory on server to put the blast files> --saveGoodBlastFiles! --fileExtension [.database_blastProgram] --doNotParse! --doNotExitOnBlastFailure! --printSimSeqsFile!\n" unless ( $program && $database && $seqFile && $blastParamsFile);
 
@@ -51,6 +52,28 @@ $regex = $regex ? $regex : '(\S+)';
 
 my $blastParams = &parseBlastParams($blastParamsFile);
 
+if($blastVendor eq "ncbi"){
+    if($databaseType eq "protein"){
+        $databaseType = "prot";
+    } elsif($databaseType eq "nucleotide"){
+        $databaseType = "nucl";
+    }
+    $blastBinDir = "/usr/bin/ncbi-blast-2.13.0+/bin/";
+    system("cat $database > newdb.fasta");
+    system("$blastBinDir/makeblastdb -in newdb.fasta -dbtype $databaseType");
+} elsif ($blastVendor eq "wu") {
+    if($databaseType eq "protein"){
+        $databaseType = "-p";
+    } elsif($databaseType eq "nucleotide"){
+        $databaseType = "-n";
+    }
+    $blastBinDir = "/usr/bin/";
+    system("cat $database > newdb.fasta");
+    system("$blastBinDir/xdformat $databaseType newdb.fasta");
+} else {
+    print LOG "Wrong specification of blastVendor. Options are ncbi or wu but $blastVendor was given";
+}
+
 if($doNotParse eq "true"){
   $saveAllBlastFiles = "true";
 }
@@ -62,24 +85,21 @@ if($saveAllBlastFiles eq "true" || $saveGoodBlastFiles eq "true"){
   }
 }
 
-open(OUT, ">$dataFile") or &error("cannot open output file $dataFile for writing");
+open(OUT, ">$dataFile") or print LOG "cannot open output file $dataFile for writing";
 select OUT; $| = 1;
 select STDOUT;
 
 print LOG "processing $seqFile\n";
-open(F, "$seqFile") || &error("couldn't open seqfile $seqFile");
-my $tempfile = "seqTmp";
+open(F, "$seqFile") || print LOG "Couldn't open seqfile $seqFile";
 my $tmpid = "";
 my $seq;
 my $cmd;
 
-if($program =~ /rpsblast/){
-  $cmd = "$program -db $database -query $seqFile $blastParams";
-}elsif($blastVendor eq 'ncbi'){
+if($blastVendor eq 'ncbi'){
   my $pgm = basename($program);
-  $cmd = ($blastBinDir eq 'default' ? "" : "$blastBinDir/") . "$pgm -db $database -query $seqFile $blastParams";
-}else{
-  $cmd= ($blastBinDir eq 'default' ? "" : "$blastBinDir/") . "$program $database $tempfile $blastParams 2> blast.stderr";
+  $cmd = "$blastBinDir/$pgm -db newdb.fasta -query $seqFile $blastParams";
+}elsif($blastVendor eq 'wu'){
+  $cmd= "$blastBinDir/$program newdb.fasta $seqFile $blastParams";
 }
 print LOG "$cmd\n\n";
 print LOG "Parser parameters and fields:\n";
@@ -105,7 +125,7 @@ close LOG;
 sub parseBlastParams {
     my ($blastParamsFile) = @_;
 
-    open(C, "$blastParamsFile") or &error("cannot open blastParams file $blastParamsFile");
+    open(C, "$blastParamsFile") or print LOG "cannot open blastParams file $blastParamsFile";
     while(<C>){
 	next if /^\s*#/;
 	chomp;
@@ -119,7 +139,7 @@ sub parseBlastParams {
 sub processEntry {
   my($cmd, $accession, $program) = @_;
 
-  print STDERR "processing $accession\n";
+  print LOG "processing $accession\n";
   my $validOutput;
   my $noHits;
   my $retry = 2;
