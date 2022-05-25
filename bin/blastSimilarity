@@ -220,14 +220,14 @@ sub analyzeBlast{
   print LOG "\n OUTPUT \n @blastn_out \n";
   print LOG "DINGBLAST\n";
   $blast->parseBlast($lengthCutoff,$percentCutoff,$pValCutoff,$regex,\@blastn_out,$remMaskedRes,($program =~ /rpsblast/ ? 1 : undef));
-  print LOG "PROBNOT\n";
+  
   if ($printSimSeqsFile eq "true"){
     &printSSFile($accession, $blast);
     return;
   }
   print LOG "DING6\n";
   print OUT "\>$accession (".$blast->getSubjectCount()." subjects)\n";
-  print STDERR "\>$accession (".$blast->getSubjectCount()." subjects)\n" if $debug;
+  
   foreach my $s ($blast->getSubjects()){
     print OUT $s->getSimilaritySummary(":")."\n" if $printSum;
     print OUT $s->getSimilaritySpans(":")."\n" if $printSpan;
