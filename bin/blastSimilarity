@@ -53,23 +53,9 @@ $regex = $regex ? $regex : '(\S+)';
 my $blastParams = &parseBlastParams($blastParamsFile);
 
 if($blastVendor eq "ncbi"){
-    if($databaseType eq "protein"){
-        $databaseType = "prot";
-    } elsif($databaseType eq "nucleotide"){
-        $databaseType = "nucl";
-    }
     $blastBinDir = "/usr/bin/ncbi-blast-2.13.0+/bin/";
-    system("cat $database > newdb.fasta");
-    system("$blastBinDir/makeblastdb -in newdb.fasta -dbtype $databaseType");
 } elsif ($blastVendor eq "wu") {
-    if($databaseType eq "protein"){
-        $databaseType = "-p";
-    } elsif($databaseType eq "nucleotide"){
-        $databaseType = "-n";
-    }
     $blastBinDir = "/usr/bin/";
-    system("cat $database > newdb.fasta");
-    system("$blastBinDir/xdformat $databaseType newdb.fasta");
 } else {
     print LOG "Wrong specification of blastVendor. Options are ncbi or wu but $blastVendor was given";
 }
@@ -97,9 +83,9 @@ my $cmd;
 
 if($blastVendor eq 'ncbi'){
   my $pgm = basename($program);
-  $cmd = "$blastBinDir/$pgm -db newdb.fasta -query $seqFile $blastParams";
+  $cmd = "$blastBinDir/$pgm -db $database -query $seqFile $blastParams";
 }elsif($blastVendor eq 'wu'){
-  $cmd= "$blastBinDir/$program newdb.fasta $seqFile $blastParams";
+  $cmd= "$blastBinDir/$program $database $seqFile $blastParams";
 }
 print LOG "$cmd\n\n";
 print LOG "Parser parameters and fields:\n";
