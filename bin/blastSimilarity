@@ -14,8 +14,7 @@ $| = 1;
 
 my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsblast,
     $database,$seqFile,$blast_version,$startNumber,$stopNumber,$dataFile,$remMaskedRes,
-    $saveAllBlastFiles,$blastFileDir,$saveGoodBlastFiles,$doNotParse,$fileExtension,
-    $blastParamsFile, $doNotExitOnBlastFailure, $blastVendor, $printSimSeqsFile,$blastBinDir, $validOutput, $databaseType);
+    $saveAllBlastFiles,$saveGoodBlastFiles,$doNotParse,$blastParamsFile, $doNotExitOnBlastFailure, $blastVendor, $printSimSeqsFile,$blastBinDir, $validOutput, $databaseType);
 
 &GetOptions("regex=s" => \$regex, 
             "pValCutoff=f" => \$pValCutoff, 
@@ -28,8 +27,6 @@ my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsbla
             "seqFile=s" => \$seqFile,
             "dataFile=s" => \$dataFile,
             "adjustMatchLength!" => \$remMaskedRes,
-            "blastFileDir=s" => \$blastFileDir,
-            "fileExtension=s" => \$fileExtension,
             "blastParamsFile=s" => \$blastParamsFile,
             "saveAllBlastFiles=s" => \$saveAllBlastFiles,
             "saveGoodBlastFiles=s" => \$saveGoodBlastFiles,
@@ -39,14 +36,13 @@ my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsbla
 	    "printSimSeqsFile=s" => \$printSimSeqsFile,
 	    "databaseType=s" => \$databaseType
             );
-die "Usage: blastSimilarity --regex=<regular expression following ^\> of defline...ie '(\S+)'> --pValCutoff=<float> --lengthCutoff=<int> --percentCutoff=<int> --outputType=(summary|span|both) --blastBinDir=<directory containing blast binaries (if 'default' then must be in \$PATH)> --blastProgram=<blastprogram> --database=<blast database> --seqFile=<sequenceFile>  --trackingFile=<filename to track progress> --blastParams 'extra blast parameters' --adjustMatchLength! --saveAllBlastFiles! --blastFileDir <directory on server to put the blast files> --saveGoodBlastFiles! --fileExtension [.database_blastProgram] --doNotParse! --doNotExitOnBlastFailure! --printSimSeqsFile!\n" unless ( $program && $database && $seqFile && $blastParamsFile);
+die "Usage: blastSimilarity --regex=<regular expression following ^\> of defline...ie '(\S+)'> --pValCutoff=<float> --lengthCutoff=<int> --percentCutoff=<int> --outputType=(summary|span|both) --blastBinDir=<directory containing blast binaries (if 'default' then must be in \$PATH)> --blastProgram=<blastprogram> --database=<blast database> --seqFile=<sequenceFile>  --trackingFile=<filename to track progress> --blastParams 'extra blast parameters' --adjustMatchLength! --saveAllBlastFiles! --saveGoodBlastFiles! --fileExtension [.database_blastProgram] --doNotParse! --doNotExitOnBlastFailure! --printSimSeqsFile!\n" unless ( $program && $database && $seqFile && $blastParamsFile);
 
 ###set the defaullts...
 $pValCutoff = $pValCutoff ? $pValCutoff : 1e-5;
 $lengthCutoff = $lengthCutoff ? $lengthCutoff : 10;
 $percentCutoff = $percentCutoff ? $percentCutoff : 20;  ##low for blastp
 $outputType = $outputType ? $outputType : "both";
-$blast_version = $blast_version ? $blast_version : "blast2";
 $dataFile = $dataFile ? $dataFile : "blastSimilarity.out";
 $regex = $regex ? $regex : '(\S+)';
 
@@ -58,17 +54,6 @@ if($blastVendor eq "ncbi"){
     $blastBinDir = "/usr/bin/";
 } else {
     print LOG "Wrong specification of blastVendor. Options are ncbi or wu but $blastVendor was given";
-}
-
-if($doNotParse eq "true"){
-  $saveAllBlastFiles = "true";
-}
-if($saveAllBlastFiles eq "true" || $saveGoodBlastFiles eq "true"){
-  if(!$fileExtension){
-    my $db = basename($database);
-    my $pg = basename($program);
-    $fileExtension = "$db\_$pg";
-  }
 }
 
 open(OUT, ">$dataFile") or print LOG "cannot open output file $dataFile for writing";
