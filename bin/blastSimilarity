@@ -221,11 +221,12 @@ sub analyzeBlast{
   }
 
   if(($saveAllBlastFiles eq "true" && $doNotParse eq "false") || ($saveGoodBlastFiles eq "true" && $blast->getSubjectCount() >= 1)){
-    my $blastOutFile = "$accession.$fileExtension";
-    print LOG "DINGSAVEGOOD";  
-    system("touch $blastOutFile");  
+    my $blastOutFile = "$accession";
+    system("touch '$blastOutFile'");
     system("cat out.txt > '$blastOutFile'");
     system("gzip -f '$blastOutFile'");
+    system("/usr/bin/fixZip.pl -string '$blastOutFile.gz'");
+    system("rm '$blastOutFile.gz'");
   }
   }
 
