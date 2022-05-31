@@ -36,8 +36,6 @@ sub new {
 }
 
 
-
-
 ##DataStructure returned by parseBlast...must have -noseqs on commandline
 ##new datastructure....
 ##{queryLength},{queryName}
@@ -46,6 +44,7 @@ sub new {
 ## takes in a blast result as an array and builds the entire datastructure
 sub parseBlast{
   system("touch blastAnal.log");
+  system("parse.pl out.xml 5 parse.txt");  
   open(LOG,">blastAnal.log");
   my $self = shift;
   my($minLength,$minPercent,$minPvalue,$regex,$blast,$remMaskedFromLen,$rpsblast,$minPercentLength) = @_;

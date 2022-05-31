@@ -17,6 +17,7 @@ process blastSimilarity {
    output:
    path 'blastSimilarity.out' into output_qch
    path 'blastSimilarity.log' into log_qch
+   path 'parse.txt' into parse_qch
    path '*.gz*' optional true into zip_qch
    path 'blastAnal.log' optional true into out_qch
    """
@@ -28,3 +29,4 @@ results = output_qch.collectFile(storeDir: params.outputDir, name: params.dataFi
 logResults = log_qch.collectFile(storeDir: params.outputDir, name: params.logFile)
 zipResults = zip_qch.collectFile(storeDir: params.outputDir)
 outResults = out_qch.collectFile(storeDir: params.outputDir)
+parseResults = parse_qch.collectFile(storeDir: params.outputDir)

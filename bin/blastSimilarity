@@ -65,10 +65,13 @@ open(F, "$seqFile") || print LOG "Couldn't open seqfile $seqFile";
 my $tmpid = "";
 my $seq;
 my $cmd;
+my $xmlcmd;
 
 if($blastVendor eq 'ncbi'){
   my $pgm = basename($program);
   $cmd = "$blastBinDir/$pgm -db $database -query $seqFile $blastParams";
+  $xmlcmd = "$blastBinDir/$pgm -db $database -query $seqFile $blastParams -outfmt 5";
+  system("$xmlcmd > out.xml");
 }elsif($blastVendor eq 'wu'){
   $cmd= "$blastBinDir/$program $database $seqFile $blastParams";
 }
@@ -116,7 +119,8 @@ sub processEntry {
   my $retry = 2;
   my $try = 1;
   do {
-    print LOG "DINGDO/n";  
+    print LOG "DINGDO/n";
+    # Create Non-xml output for checking and zipping
     system("$cmd > out.txt");
     ($validOutput, $noHits) =
 	&checkOutput($accession);
