@@ -28,8 +28,7 @@ my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsbla
             "saveAllBlastFiles=s" => \$saveAllBlastFiles,
             "saveGoodBlastFiles=s" => \$saveGoodBlastFiles,
             "doNotParse=s" => \$doNotParse,
-            "doNotExitOnBlastFailure=s" => \$doNotExitOnBlastFailure,
-	    "printSimSeqsFile=s" => \$printSimSeqsFile,
+            "printSimSeqsFile=s" => \$printSimSeqsFile,
 	    );
 die "Usage: blastSimilarity --regex=<regular expression following ^\> of defline...ie '(\S+)'> --pValCutoff=<float> --lengthCutoff=<int> --percentCutoff=<int> --outputType=(summary|span|both) --blastBinDir=<directory containing blast binaries (if 'default' then must be in \$PATH)> --blastProgram=<blastprogram> --database=<blast database> --seqFile=<sequenceFile>  --trackingFile=<filename to track progress> --blastParams 'extra blast parameters' --adjustMatchLength! --saveAllBlastFiles! --saveGoodBlastFiles! --fileExtension [.database_blastProgram] --doNotParse! --doNotExitOnBlastFailure! --printSimSeqsFile!\n" unless ( $program && $database && $seqFile);
 
@@ -45,6 +44,7 @@ my $blastParams = &parseBlastParams($blastParamsFile);
 
 $blastVendor = "ncbi";
 $blastBinDir = "/usr/bin/ncbi-blast-2.13.0+/bin";
+$doNotExitOnBlastFailure = "false";
 
 open(OUT, ">$dataFile") or print LOG "cannot open output file $dataFile for writing";
 select OUT; $| = 1;
