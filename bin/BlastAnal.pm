@@ -43,8 +43,6 @@ sub new {
 
 ## takes in a blast result as an array and builds the entire datastructure
 sub parseBlast{
-  system("touch blastAnal.log");
-  system("parse.pl out.xml 5 parse.txt");  
   open(LOG,">blastAnal.log");
   my $self = shift;
   my($minLength,$minPercent,$minPvalue,$regex,$blast,$remMaskedFromLen,$rpsblast,$minPercentLength) = @_;
@@ -82,15 +80,15 @@ sub parseBlast{
     }
     if (/^Query=\s*(\S+)/) {
       $self->{queryName} = $1;	##query name/id
-    } elsif (/^Length=(\S+)/ || /^\s*\((\S*)\s*letters/) {
+    } elsif (/^Length=(\S+)/) {
 	print LOG "Letters Trigger\n";
 	$self->setQueryLength($1); ##query length
 	print LOG "$1\n";
     }
-    if (/^\>\s*(\S+)/ || /ctxfactor/ || /^Lambda/) { ##ctxfactor catches the last one...Lambda last of rpsblast
+    if (/^\>(\S+)/ || /ctxfactor/ || /^Lambda/) { ##ctxfactor catches the last one...Lambda last of rpsblast
       my $sbjctId;
       $desc = "";
-      if (/^\>\s*(\S+)/){
+      if (/^\>(\S+)/){
         $sbjctId = $1 ? $1 : $2;
       }else{
         print "$self->{queryName}: Unable to match subject using regex '$regex' on:\n  $_" unless (/ctxfactor/ || /^Lambda/);
@@ -144,7 +142,7 @@ sub parseBlast{
       }
       
     }
-    if (/^\s*Length\s*=\s*(\S+)/) {
+    if (/^Length=(\S+)/) {
       if($sbjct){
         print LOG "SubLen Trigger\n";	    
         $inDesc = 0;
@@ -156,7 +154,7 @@ sub parseBlast{
       }
       ##end remaining calculations
     }
-    if (/^\s*Score\s*=\s*\d+\sbits\s\((\d+).*=\s(\S+)/ || /^\s*Score\s*=\s*(\d+).*=\s(\S+)/) {
+    if (/^\s*Score\s*=\s*\d+\sbits\s\((\d+).*=\s(\S+)/) {
       my $tmpScore = $1;
       my $tmpValue = $2;
       $tmpValue =~ s/,//g;
