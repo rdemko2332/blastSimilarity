@@ -103,7 +103,7 @@ sub parseBlast{
         #	print $sbjct->getID()," $sStart,$sEnd: Length=$matchLength, Percent=$matchPercent, pValue=$pValue\n";
         if ($matchLength >= $minLength && $matchPercent >= $minPercent && $pValue <= $minPvalue) {
           print LOG "Match meets reqs\n";
-          if($remMaskedFromLen){  ##want to remove Xs from the match length....
+          if($remMaskedFromLen eq "true"){  ##want to remove Xs from the match length....
 #            print STDERR "removing X from match\n";
 #            print STDERR "Before: $queryMatch\n";
             $queryMatch =~ s/X//g;

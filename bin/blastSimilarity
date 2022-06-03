@@ -29,7 +29,7 @@ my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsbla
             "saveGoodBlastFiles=s" => \$saveGoodBlastFiles,
             "doNotParse=s" => \$doNotParse,
             "doNotExitOnBlastFailure=s" => \$doNotExitOnBlastFailure,
-	    "printSimSeqsFile=s" => \$printSimSeqsFile
+	    "printSimSeqsFile=s" => \$printSimSeqsFile,
 	    );
 die "Usage: blastSimilarity --regex=<regular expression following ^\> of defline...ie '(\S+)'> --pValCutoff=<float> --lengthCutoff=<int> --percentCutoff=<int> --outputType=(summary|span|both) --blastBinDir=<directory containing blast binaries (if 'default' then must be in \$PATH)> --blastProgram=<blastprogram> --database=<blast database> --seqFile=<sequenceFile>  --trackingFile=<filename to track progress> --blastParams 'extra blast parameters' --adjustMatchLength! --saveAllBlastFiles! --saveGoodBlastFiles! --fileExtension [.database_blastProgram] --doNotParse! --doNotExitOnBlastFailure! --printSimSeqsFile!\n" unless ( $program && $database && $seqFile);
 
@@ -112,8 +112,7 @@ sub processEntry {
       return; 
     } else {
 	system("cat out.txt > blast.out");
-	print LOG "Failed ($try times) running '$cmd'";
-  }
+    }
   }
   if ($noHits==1) {
       print OUT "\>$accession (0 subjects)\n" unless ($printSimSeqsFile eq "true");
