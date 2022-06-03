@@ -5,15 +5,13 @@ use Getopt::Long;
 
 my $dbFile;
 my $blastProgram;
-my $blastVendor;
-my $blastBinDir;
 my $databaseType;
 
 GetOptions("dbFile=s" => \$dbFile,
 	   "blastProgram=s" => \$blastProgram	
 	   );
 
-$blastVendor ="ncbi";
+my $blastVendor ="ncbi";
 
 system("cat $dbFile > newdb.fasta");
 
@@ -23,7 +21,7 @@ if($blastProgram eq "blastp" || $blastProgram eq "blastx" || $blastProgram eq "r
   $databaseType = "nucl";  
 }
 
-$blastBinDir = "/usr/bin/ncbi-blast-2.13.0+/bin";
+my $blastBinDir = "/usr/bin/ncbi-blast-2.13.0+/bin";
 
 system("$blastBinDir/makeblastdb -in newdb.fasta -dbtype $databaseType");
 

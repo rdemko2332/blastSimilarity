@@ -9,7 +9,6 @@ use File::Basename;
 open(LOG,">blastSimilarity.log");
 
 my $debug = 0;
-
 $| = 1;
 
 my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsblast,
@@ -33,7 +32,7 @@ my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsbla
             "doNotExitOnBlastFailure=s" => \$doNotExitOnBlastFailure,
 	    "printSimSeqsFile=s" => \$printSimSeqsFile
 	    );
-die "Usage: blastSimilarity --regex=<regular expression following ^\> of defline...ie '(\S+)'> --pValCutoff=<float> --lengthCutoff=<int> --percentCutoff=<int> --outputType=(summary|span|both) --blastBinDir=<directory containing blast binaries (if 'default' then must be in \$PATH)> --blastProgram=<blastprogram> --database=<blast database> --seqFile=<sequenceFile>  --trackingFile=<filename to track progress> --blastParams 'extra blast parameters' --adjustMatchLength! --saveAllBlastFiles! --saveGoodBlastFiles! --fileExtension [.database_blastProgram] --doNotParse! --doNotExitOnBlastFailure! --printSimSeqsFile!\n" unless ( $program && $database && $seqFile && $blastParamsFile);
+die "Usage: blastSimilarity --regex=<regular expression following ^\> of defline...ie '(\S+)'> --pValCutoff=<float> --lengthCutoff=<int> --percentCutoff=<int> --outputType=(summary|span|both) --blastBinDir=<directory containing blast binaries (if 'default' then must be in \$PATH)> --blastProgram=<blastprogram> --database=<blast database> --seqFile=<sequenceFile>  --trackingFile=<filename to track progress> --blastParams 'extra blast parameters' --adjustMatchLength! --saveAllBlastFiles! --saveGoodBlastFiles! --fileExtension [.database_blastProgram] --doNotParse! --doNotExitOnBlastFailure! --printSimSeqsFile!\n" unless ( $program && $database && $seqFile);
 
 ###set the defaullts...
 $pValCutoff = $pValCutoff ? $pValCutoff : 1e-5;
@@ -77,7 +76,6 @@ processEntry($cmd, $tmpid, $program);
 
 close F;
 close OUT;
-print LOG "DING2\n";
 close LOG;
 
 ######################### subroutines ###########################
@@ -92,7 +90,6 @@ sub parseBlastParams {
 	$blastParams .= "$_ ";
     }
     close(C);
-    print LOG "DING3\n";
     return $blastParams;
 }
 
@@ -105,7 +102,6 @@ sub processEntry {
   my $retry = 2;
   my $try = 1;
   do {
-    print LOG "DINGDO/n";
     # Create Non-xml output for checking and zipping
     system("$cmd > out.txt");
     ($validOutput, $noHits) =
@@ -125,9 +121,7 @@ sub processEntry {
       print OUT "\>$accession (0 subjects)\n" unless ($printSimSeqsFile eq "true");
   } else {
 	&analyzeBlast($accession);
-	print LOG "DINGVALID/n";
   }
-  print LOG "DING4\n";
 }
 
 sub checkOutput {
@@ -146,14 +140,11 @@ sub checkOutput {
     } elsif (`grep "Sequences producing" out.txt`) {
          $validOutput = 1;
 	 $noHits = 0;
-	 print LOG "DING5\n";  
     }
-    print LOG "DINGCHECK\n";
 }
   
 sub analyzeBlast{
   my($accession) = @_;
-  print LOG "DINGBLAST1\n";
   my $printSum = 0;
   my $printSpan = 0;
   if($outputType =~ /sum/i){
@@ -163,7 +154,6 @@ sub analyzeBlast{
   }elsif($outputType =~ /both/i){
       $printSum = 1;
       $printSpan = 1;
-      print LOG "DINGBLAST2\n";
   }
 
   if($doNotParse eq "true"){ ##in this case must  be saving all blast files...
@@ -175,24 +165,20 @@ sub analyzeBlast{
     system("rm '$blastOutFile.gz'");
     return;
   }
-  print LOG "DINGBLAST3\n";
   my $blast = BlastAnal->new($debug);
   my @blastn_out = `$cmd`;
-  print LOG "\n OUTPUT \n @blastn_out \n";
-  print LOG "DINGBLAST\n";
   $blast->parseBlast($lengthCutoff,$percentCutoff,$pValCutoff,$regex,\@blastn_out,$remMaskedRes,($program =~ /rpsblast/ ? 1 : undef));
   
   if ($printSimSeqsFile eq "true"){
     &printSSFile($accession, $blast);
     return;
   }
-  print LOG "DING6\n";
+  
   print OUT "\>$accession (".$blast->getSubjectCount()." subjects)\n";
   
   foreach my $s ($blast->getSubjects()){
     print OUT $s->getSimilaritySummary(":")."\n" if $printSum;
     print OUT $s->getSimilaritySpans(":")."\n" if $printSpan;
-    print LOG "DING7\n";
   }
 
   if(($saveAllBlastFiles eq "true" && $doNotParse eq "false") || ($saveGoodBlastFiles eq "true" && $blast->getSubjectCount() >= 1)){

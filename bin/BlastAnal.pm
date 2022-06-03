@@ -133,7 +133,6 @@ sub parseBlast{
       
       ##      print STDERR "New Subject $sbjctId\n";
       $sbjct = Subject->new($sbjctId) if $sbjctId;
-      print LOG "DING\n" if $sbjctId;
       ##lets get the description here could be on multiple lines so need to set something to take care of this..
       if(/^\>\S+\s(.*)$/){
         $desc = $1;
@@ -161,7 +160,7 @@ sub parseBlast{
 
       ##need to add here if $haveQStart != 0;
       if ($haveQStart) {
-        ##have the complete HSP...
+       ##have the complete HSP...
         ##want to add only if meets minimum reqs....do this on an HSP basis...
         if ($matchLength >= $minLength && $matchPercent >= $minPercent && $pValue <= $minPvalue && $sbjct) {
 #        if (($minPercentLength ? ( $matchLength >= ($sbjct->getLength() < $sbjct->getQueryLength() ? $sbjct->getLength() * $minPercentLength : $sbjct->getQueryLength() * $minPercentLength))  : $matchLength >= $minLength) && $matchPercent >= $minPercent && $pValue <= $minPvalue && $sbjct) {
