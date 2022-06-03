@@ -15,8 +15,7 @@ my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsbla
     $database,$seqFile,$blast_version,$startNumber,$stopNumber,$dataFile,$remMaskedRes,
     $saveAllBlastFiles,$saveGoodBlastFiles,$doNotParse,$blastParamsFile, $doNotExitOnBlastFailure, $blastVendor, $printSimSeqsFile,$blastBinDir, $validOutput);
 
-&GetOptions("regex=s" => \$regex, 
-            "pValCutoff=f" => \$pValCutoff, 
+&GetOptions("pValCutoff=f" => \$pValCutoff, 
             "lengthCutoff=i"=> \$lengthCutoff,
             "percentCutoff=i" => \$percentCutoff,
             "outputType=s" => \$outputType,
@@ -68,7 +67,6 @@ print LOG "#   HSP: subject_Identifier:numberIdentical:numberPositive:matchLengt
 
 while(<F>){
     if(/^\>(\S+)/){
-    print LOG "DING1\n";	
     $tmpid = $1;
     }
 }

@@ -20,7 +20,7 @@ process blastSimilarity {
    path '*.gz*' optional true into zip_qch
    path 'blastAnal.log' optional true into out_qch
    """
-   blastSimilarity --regex $params.regex --pValCutoff  $params.pValCutoff --lengthCutoff $params.lengthCutoff --percentCutoff  $params.percentCutoff --blastProgram  $params.blastProgram --database newdb.fasta --seqFile subset.fa  --blastParams $params.blastParams --doNotParse $params.doNotParse --printSimSeqsFile $params.printSimSeqsFile --saveAllBlastFiles $params.saveAllBlastFiles --saveGoodBlastFiles $params.saveGoodBlastFiles --doNotExitOnBlastFailure $params.doNotExitOnBlastFailure 
+   blastSimilarity --pValCutoff  $params.pValCutoff --lengthCutoff $params.lengthCutoff --percentCutoff  $params.percentCutoff --blastProgram  $params.blastProgram --database newdb.fasta --seqFile subset.fa  --blastParams $params.blastParams --doNotParse $params.doNotParse --printSimSeqsFile $params.printSimSeqsFile --saveAllBlastFiles $params.saveAllBlastFiles --saveGoodBlastFiles $params.saveGoodBlastFiles --doNotExitOnBlastFailure $params.doNotExitOnBlastFailure 
    """
 }
 
