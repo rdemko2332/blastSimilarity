@@ -9,3 +9,4 @@
      #+begin_example
      nextflow run VEuPathDB/blastSimilarity -with-trace -c  <config_file> -r main
      #+end_example
+   Note: this tool does not include functionality for blastn
