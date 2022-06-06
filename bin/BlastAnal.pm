@@ -1,12 +1,5 @@
 #!/usr/bin/perl
 
-## perl module for dealing with blast results...
-## contains the hits for one query sequence
-## will parse both  --noseqs and normal blast.
-## does not parse out the alignments, rather meta information for each subject and hsp
-
-## Brian Brunk 5/17/99
-
 package BlastAnal;
 
 use Exporter;
@@ -23,23 +16,15 @@ use strict;
 
 my $debug = 0;
 
-##simple constructor...need to make more robust if inheriting for other purposes
 sub new {
   my $self = {};
   my $class = shift;
   my $d = shift;
   bless $self,$class;
   $debug = defined $d ? $d : 0;
-  print STDERR "DEBUGGING ON\n" if $debug == 1;
   $self->{"countSubjects"} = 0;
   return $self;
 }
-
-
-##DataStructure returned by parseBlast...must have -noseqs on commandline
-##new datastructure....
-##{queryLength},{queryName}
-##{subjects} = array of Subject objects...
 
 ## takes in a blast result as an array and builds the entire datastructure
 sub parseBlast{
@@ -103,13 +88,13 @@ sub parseBlast{
         #	print $sbjct->getID()," $sStart,$sEnd: Length=$matchLength, Percent=$matchPercent, pValue=$pValue\n";
         if ($matchLength >= $minLength && $matchPercent >= $minPercent && $pValue <= $minPvalue) {
           print LOG "Match meets reqs\n";
-          if($remMaskedFromLen){  ##want to remove Xs from the match length....
+          if($remMaskedFromLen eq "true"){  ##want to remove Xs from the match length....
 #            print STDERR "removing X from match\n";
 #            print STDERR "Before: $queryMatch\n";
             $queryMatch =~ s/X//g;
 #            print STDERR "After: $queryMatch\n";
             if(length($queryMatch) < 10){ ##don't remove if final length < 10
-              print "RemoveMaskedResiduesFromLength: error...length = ".length($queryMatch)." following removal of X's\n";
+              print LOG "RemoveMaskedResiduesFromLength: error...length = ".length($queryMatch)." following removal of X's\n";
             }else{
 #              print "match before $matchLength\n";
               $matchLength = length($queryMatch);
@@ -133,7 +118,6 @@ sub parseBlast{
       
       ##      print STDERR "New Subject $sbjctId\n";
       $sbjct = Subject->new($sbjctId) if $sbjctId;
-      print LOG "DING\n" if $sbjctId;
       ##lets get the description here could be on multiple lines so need to set something to take care of this..
       if(/^\>\S+\s(.*)$/){
         $desc = $1;
@@ -161,11 +145,11 @@ sub parseBlast{
 
       ##need to add here if $haveQStart != 0;
       if ($haveQStart) {
-        ##have the complete HSP...
+       ##have the complete HSP...
         ##want to add only if meets minimum reqs....do this on an HSP basis...
         if ($matchLength >= $minLength && $matchPercent >= $minPercent && $pValue <= $minPvalue && $sbjct) {
 #        if (($minPercentLength ? ( $matchLength >= ($sbjct->getLength() < $sbjct->getQueryLength() ? $sbjct->getLength() * $minPercentLength : $sbjct->getQueryLength() * $minPercentLength))  : $matchLength >= $minLength) && $matchPercent >= $minPercent && $pValue <= $minPvalue && $sbjct) {
-          print STDERR "Adding Sbjct (score) ",$sbjct->getID()," SS:$sStart,SE:$sEnd, QS:$qStart, QE:$qEnd, Length=$matchLength, Percent=$matchPercent, pValue=$pValue, Frame=$frame\n" if $debug == 1;
+          #print STDERR "Adding Sbjct (score) ",$sbjct->getID()," SS:$sStart,SE:$sEnd, QS:$qStart, QE:$qEnd, Length=$matchLength, Percent=$matchPercent, pValue=$pValue, Frame=$frame\n" if $debug == 1;
           print STDERR "Adding Sbjct\n" if $debug;
           if($remMaskedFromLen){  ##want to remove Xs from the match length....
 #            print STDERR "removing X from match\n";
