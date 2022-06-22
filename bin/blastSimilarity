@@ -30,11 +30,8 @@ my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsbla
             "doNotParse=s" => \$doNotParse,
             "printSimSeqsFile=s" => \$printSimSeqsFile,
 	    );
-<<<<<<< HEAD
+
 die "Usage: blastSimilarity > --pValCutoff=<float> --lengthCutoff=<int> --percentCutoff=<int> --outputType=(summary|span|both) --blastProgram=<blastprogram> --database=<blast database> --seqFile=<sequenceFile>  --blastParams 'extra blast parameters' --adjustMatchLength! --saveAllBlastFiles! --saveGoodBlastFiles! --doNotParse! --printSimSeqsFile!\n" unless ( $program && $database && $seqFile);
-=======
-die "Usage: blastSimilarity --regex=<regular expression following ^\> of defline...ie '(\S+)'> --pValCutoff=<float> --lengthCutoff=<int> --percentCutoff=<int> --outputType=(summary|span|both) --blastBinDir=<directory containing blast binaries (if 'default' then must be in \$PATH)> --blastProgram=<blastprogram> --database=<blast database> --seqFile=<sequenceFile>  --trackingFile=<filename to track progress> --blastParams 'extra blast parameters' --adjustMatchLength! --saveAllBlastFiles! --saveGoodBlastFiles! --fileExtension [.database_blastProgram] --doNotParse! --doNotExitOnBlastFailure! --printSimSeqsFile!\n" unless ( $program && $database && $seqFile);
->>>>>>> 5acf4cf574978127677f8ff4e73c13f89e4b5bcb
 
 ###set the defaullts...
 $pValCutoff = $pValCutoff ? $pValCutoff : 1e-5;
