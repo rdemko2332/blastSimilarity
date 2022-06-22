@@ -10,7 +10,7 @@ process createDatabase {
 }
 
 process blastSimilarity {
-  publishDir params.outputDir, mode: 'copy'
+  publishDir params.outputDir, mode: 'copy', saveAs: {filename -> filename.endsWith(".out") ? params.dataFile : filename.endsWith(".log") ? params.logFile : filename }
 
   input:
   path 'subset.fa'
