@@ -1,29 +1,28 @@
-nextflow.enable.dsl=1
-seq_qch = Channel.fromPath(params.seqFile).splitFasta( by:1, file:true  )
-db_vch = Channel.value()
+nextflow.enable.dsl=2
 process createDatabase {
     output:
-    path 'newdb.fasta.*' into db_vch
+    path 'newdb.fasta.*'
     """
     createDatabase.pl --dbFile $params.databaseFasta --blastProgram $params.blastProgram 
     """
 }
-
 process blastSimilarity {
+   publishDir params.outputDir, mode: 'copy'
    input:
-   path 'subset.fa' from seq_qch
+   path 'subset.fa'
    // Retaining names from the input into db_vch
-   path blastDatabase from db_vch
+   path blastDatabase
    output:
-   path 'blastSimilarity.out' into output_qch
-   path 'blastSimilarity.log' into log_qch
-   path '*.gz*' optional true into zip_qch
+   path 'blastSimilarity.out'
+   path 'blastSimilarity.log'
+   path '*.gz*' optional true
    """
    blastSimilarity --pValCutoff  $params.pValCutoff --lengthCutoff $params.lengthCutoff --percentCutoff  $params.percentCutoff --blastProgram  $params.blastProgram --database newdb.fasta --seqFile subset.fa  --blastParams $params.blastParams --doNotParse $params.doNotParse --printSimSeqsFile $params.printSimSeqsFile --saveAllBlastFiles $params.saveAllBlastFiles --saveGoodBlastFiles $params.saveGoodBlastFiles --remMaskedRes $params.adjustMatchLength
    """
 }
-
-results = output_qch.collectFile(storeDir: params.outputDir, name: params.dataFile)
-logResults = log_qch.collectFile(storeDir: params.outputDir, name: params.logFile)
-zipResults = zip_qch.collectFile(storeDir: params.outputDir)
+workflow {
+  database = createDatabase()
+  seqs = Channel.fromPath(params.seqFile).splitFasta( by:1, file:true  )
+  blastSimilarity(seqs, database)
+}
 
