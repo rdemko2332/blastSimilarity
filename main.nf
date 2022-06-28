@@ -3,15 +3,12 @@ nextflow.enable.dsl=2
 process createDatabase {
   output:
   path 'newdb.fasta.*'
-
   """
   createDatabase.pl --dbFile $params.databaseFasta --blastProgram $params.blastProgram 
   """
 }
 
 process blastSimilarity {
-  publishDir params.outputDir, mode: 'copy', saveAs: {filename -> filename.endsWith(".out") ? params.dataFile : filename.endsWith(".log") ? params.logFile : filename }
-
   input:
   val fastaName
   path 'subset.fa'
@@ -32,12 +29,15 @@ workflow {
   if (params.preConfiguredDatabase == "false") {
     database = createDatabase()
     seqs = Channel.fromPath(params.seqFile).splitFasta( by:1, file:true  )
-    blastSimilarity("newdb.fasta", seqs, database)
+    results = blastSimilarity("newdb.fasta", seqs, database) 
   }
   if (params.preConfiguredDatabase == "true") {
     database = file(params.databaseDir + "/*")
     seqs = Channel.fromPath(params.seqFile).splitFasta( by:1, file:true  )
-    blastSimilarity(params.databaseBaseName, seqs, database)
+    results = blastSimilarity(params.databaseBaseName, seqs, database)
   }
+  results[0] | collectFile(storeDir: params.outputDir, name: params.dataFile)
+  results[1] | collectFile(storeDir: params.outputDir, name: params.logFile)
+  results[2] | collectFile(storeDir: params.outputDir)
 }
 
