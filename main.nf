@@ -27,7 +27,7 @@ process blastSimilarity {
 
 workflow {
   seqs = Channel.fromPath(params.seqFile).splitFasta( by:params.fastaSubsetSize, file:true  )
-  if (!params.preConfiguredDatabasee) {
+  if (!params.preConfiguredDatabase) {
     database = createDatabase()
     results = blastSimilarity("newdb.fasta", seqs, database) 
   }
