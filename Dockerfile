@@ -18,7 +18,8 @@ RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast
   && rm -rf ncbi-blast-2.13.0+-x64-linux.tar.gz
 
 # Adding Perl module files and fixZip.pl to usr/bin/
-ADD /bin/* /usr/bin/
+ADD /bin/*.pm /lib/perl/
+ADD /bin/*.pl /usr/bin/
 
 # Making all blast tools executable
 RUN chmod +x * \
@@ -26,10 +27,10 @@ RUN chmod +x * \
   &&  chmod +x *
 
 # Setting PATH
-ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/ncbi-blast-2.13.0+/bin:/usr/bin/ncbi-blast-2.13.0+
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/ncbi-blast-2.13.0+/bin:/usr/bin/ncbi-blast-2.13.0+:/lib/perl/
 
 # Setting PERL5LIB, a variable that specifies where to look for perl module files
-ENV PERL5LIB=/usr/bin/
+ENV PERL5LIB=/lib/perl/
 
 WORKDIR /work
 
