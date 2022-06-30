@@ -13,7 +13,7 @@ $| = 1;
 
 my ($regex,$pValCutoff,$lengthCutoff,$percentCutoff,$outputType,$program,$rpsblast,
     $database,$seqFile,$blast_version,$startNumber,$stopNumber,$dataFile,$remMaskedRes,
-    $saveAllBlastFiles,$saveGoodBlastFiles,$doNotParse,$blastParamsFile, $doNotExitOnBlastFailure, $blastVendor, $printSimSeqsFile,$blastBinDir, $validOutput);
+    $saveAllBlastFiles,$saveGoodBlastFiles,$doNotParse,$blastParamsFile, $doNotExitOnBlastFailure, $blastVendor, $printSimSeqsFile,$blastBinDir, $validOutput, $exitCode);
 
 &GetOptions("pValCutoff=f" => \$pValCutoff, 
             "lengthCutoff=i"=> \$lengthCutoff,
@@ -113,6 +113,7 @@ sub processEntry {
       return; 
     } else {
 	system("cat out.txt > blast.out");
+	if ($? != 0) {die "Failed to move contents of out.txt to blast.out"};
     }
   }
   if ($noHits==1) {
@@ -157,10 +158,15 @@ sub analyzeBlast{
   if($doNotParse eq "true"){ ##in this case must  be saving all blast files...
     my $blastOutFile = "$accession";
     system("touch '$blastOutFile'");
+    if ($? != 0) {die "Failed to create blastOutFile $blastOutFile"};
     system("cat out.txt > '$blastOutFile'");
+    if ($? != 0) {die "Failed to move contents of out.txt to blastOutFile $blastOutFile"};
     system("gzip -f '$blastOutFile'");
+    if ($? != 0) {die "Failed to zip blastOutFile $blastOutFile"};
     system("/usr/bin/fixZip.pl -string '$blastOutFile.gz'");
+    if ($? != 0) {die "Failed to run fixZip.pl on zipped blastOutFile $blastOutFile"}
     system("rm '$blastOutFile.gz'");
+    if ($? != 0) {die "Failed to rm old zipfile $blastOutFile.gz"};
     return;
   }
   my $blast = BlastAnal->new($debug);
@@ -182,12 +188,15 @@ sub analyzeBlast{
   if(($saveAllBlastFiles eq "true" && $doNotParse eq "false") || ($saveGoodBlastFiles eq "true" && $blast->getSubjectCount() >= 1)){
     my $blastOutFile = "$accession";
     system("touch '$blastOutFile'");
+    if ($? != 0) {die "Failed to create blastOutFile $blastOutFile"};
     system("cat out.txt > '$blastOutFile'");
+    if ($? != 0) {die "Failed to move contents of out.txt to blastOutFile $blastOutFile"};
     system("gzip -f '$blastOutFile'");
+    if ($? != 0) {die "Failed to zip blastOutFile $blastOutFile"};
     system("/usr/bin/fixZip.pl -string '$blastOutFile.gz'");
-    system("rm '$blastOutFile.gz'");
-  }
-  }
+    if ($? != 0) {die "Failed to run fixZip.pl on zipped blastOutFile $blastOutFile"};
+  } 
+}
 
 sub breakSequence{
   my($seq) = @_;
