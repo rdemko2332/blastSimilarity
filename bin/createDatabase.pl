@@ -17,7 +17,7 @@ system("cat $dbFile > newdb.fasta");
 
 if($blastProgram eq "blastp" || $blastProgram eq "blastx" || $blastProgram eq "rpstblastn" || $blastProgram eq "rpsblast" || $blastProgram eq "psiblast"){
   $databaseType = "prot";
-}elsif($blastProgram eq "tblastn" || $blastProgram eq "tblastx") {
+}elsif($blastProgram eq "tblastn" || $blastProgram eq "tblastx" || $blastProgram eq "blastn") {
   $databaseType = "nucl";  
 }
 

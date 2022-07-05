@@ -53,7 +53,7 @@ sub parseBlast{
   die "these are the args to parseBlast($minLength,$minPercent,$minPvalue,$regex,$rpsblast,$minPercentLength)\n" if scalar(@{$blast}) <= 10;
   foreach (@{$blast}) {
     #    print STDERR $_;
-    if (/^(\S*BLAST\S+)/){   ##gets the algorighm used for the query...
+    if (/^(\S*BLAST\S+)/ || /^(\S*TBLAST\S+)/ ){   ##gets the algorighm used for the query...
       my $algo = $1;
       print LOG "algorithm = $algo\n";
       if($algo =~ /BLASTX/i){
@@ -63,10 +63,11 @@ sub parseBlast{
       }
       print LOG "ParseType='$parseType'\n";
     }
-    if (/^Query=\s*(\S+)/) {
+    if (/^Query=\s*(\S+)/ || /^Query=\s*(\S+)\s(\S+)/) {
+	print LOG "Ding Query Name\n";
       $self->{queryName} = $1;	##query name/id
     } elsif (/^Length=(\S+)/) {
-	print LOG "Letters Trigger\n";
+	print LOG "Ding Letters Trigger\n";
 	$self->setQueryLength($1); ##query length
 	print LOG "$1\n";
     }
@@ -74,6 +75,7 @@ sub parseBlast{
       my $sbjctId;
       $desc = "";
       if (/^\>(\S+)/){
+	print LOG "Ding sbjctID\n";
         $sbjctId = $1 ? $1 : $2;
       }else{
         print "$self->{queryName}: Unable to match subject using regex '$regex' on:\n  $_" unless (/ctxfactor/ || /^Lambda/);
@@ -182,9 +184,9 @@ sub parseBlast{
       $identities = $1; $matchLength = $2; $matchPercent = $3; $positives = $4; $frame = $5;
       $dir = $frame =~ /^\+/ ? 1 : 0;
       ##following specific to blastn
-    }elsif (/^\s*Identities\s=\s(\d+)\/(\d+)\s\((\d+)\%\),\sPositives\s=\s(\d+).*Strand\s=\s(\w+)/) {
-      $identities = $1; $matchLength = $2; $matchPercent = $3; $positives = $4; $strand = $5;
-      $dir = $strand eq 'Minus' ? 0 : 1;
+    }elsif (/^\s*Identities\s=\s(\d+)\/(\d+)\s\((\d+)\%\),\sGaps\s=\s(\d+)\/\d+\s\(\d+\%\)/) {
+      print LOG "Ding Values\n";
+      $identities = $1; $matchLength = $2; $matchPercent = $3; $positives = $4; 
       ##following for blastp the default if others not matched...
     }elsif (/^\s*Identities\s=\s(\d+)\/(\d+)\s\((\d+)\%\),\sPositives\s=\s(\d+)/){
       $identities = $1; $matchLength = $2; $matchPercent = $3; $positives = $4;
@@ -192,6 +194,9 @@ sub parseBlast{
     }elsif (/^\s*Frame\s=\s(.\d)/){ ##frame for rpsblast
       $frame = $1;
       $dir = $frame =~ /^\+/ ? 1 : 0;
+    }elsif (/^\s*Strand=(\S+)\//) {
+      $dir = $1;
+      $dir = $strand eq 'Minus' ? 0 : 1; 	
     }
 
     if (/^Query\s+(\d+)\s(.*)\s(\d+)\s*$/ || /^Query:\s+(\d+)\s(.*)\s(\d+)\s*$/) {
