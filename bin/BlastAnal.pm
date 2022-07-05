@@ -186,7 +186,7 @@ sub parseBlast{
       ##following specific to blastn
     }elsif (/^\s*Identities\s=\s(\d+)\/(\d+)\s\((\d+)\%\),\sGaps\s=\s(\d+)\/\d+\s\(\d+\%\)/) {
       print LOG "Ding Values\n";
-      $identities = $1; $matchLength = $2; $matchPercent = $3; $positives = $4; 
+      $identities = $1; $matchLength = $2; $matchPercent = $3; $positives = "NA"; 
       ##following for blastp the default if others not matched...
     }elsif (/^\s*Identities\s=\s(\d+)\/(\d+)\s\((\d+)\%\),\sPositives\s=\s(\d+)/){
       $identities = $1; $matchLength = $2; $matchPercent = $3; $positives = $4;
