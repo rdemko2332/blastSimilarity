@@ -4,7 +4,8 @@ process createDatabase {
   output:
   path 'newdb.fasta.*'
   """
-  createDatabase.pl --dbFile $params.databaseFasta --blastProgram $params.blastProgram 
+  cp $params.databaseFasta newdb.fasta
+  makeblastdb -in newdb.fasta -dbtype $params.databaseType	
   """
 }
 
