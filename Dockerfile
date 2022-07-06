@@ -18,7 +18,7 @@ RUN wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast
   && rm -rf ncbi-blast-2.13.0+-x64-linux.tar.gz
 
 # Adding Perl module files and fixZip.pl to usr/bin/
-ADD /bin/*.pm /lib/perl/
+ADD /lib/perl/*.pm /lib/perl/
 ADD /bin/*.pl /usr/bin/
 
 # Making all blast tools executable
