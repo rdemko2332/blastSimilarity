@@ -5,6 +5,7 @@
 - **inputFile** (*String*) The location of your inputFile.
 - **preConfiguredDatabase** (*Boolean*) If you have databasefiles generated from NCBI's makeblastdb, there is no need to generate these files. If this is set to true, you will need to supply databaseDir and databaseBaseName.
 - **databaseDir** (*String*) The path to the directory containing the database files. There can be other files in this directory, but any file beginning with the databaseBaseName will be brought into the process.
+- **databaseBaseName** (*String*) The rootname for you database files. For example, "newdb.fasta" would be used for the files in data/database.
 - **databaseFasta** (*String*) The location of the fasta file that you would like to use to create your database. Needed if preConfiguredDatabase is false.
 - **dataFile** (*String*) How you would like the main output file to be named.
 - **logFile** (*String*) How you would like the log file to be named.
