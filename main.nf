@@ -5,7 +5,9 @@ process createDatabase {
   path 'newdb.fasta.*'
   """
   cp $params.databaseFasta newdb.fasta
-  makeblastdb -in newdb.fasta -dbtype $params.databaseType	
+  makeblastdb \
+      -in newdb.fasta \
+      -dbtype $params.databaseType	
   """
 }
 
@@ -22,7 +24,19 @@ process blastSimilarity {
   path '*.gz*' optional true
 
   """
-  blastSimilarity.pl --pValCutoff  $params.pValCutoff --lengthCutoff $params.lengthCutoff --percentCutoff  $params.percentCutoff --blastProgram  $params.blastProgram --database $fastaName --seqFile subset.fa  --blastParams $params.blastParamsFile --doNotParse $params.doNotParse --printSimSeqsFile $params.printSimSeqsFile --saveAllBlastFiles $params.saveAllBlastFiles --saveGoodBlastFiles $params.saveGoodBlastFiles --remMaskedRes $params.adjustMatchLength
+  blastSimilarity.pl \
+    --pValCutoff  $params.pValCutoff \
+    --lengthCutoff $params.lengthCutoff \
+    --percentCutoff $params.percentCutoff \
+    --blastProgram $params.blastProgram \
+    --database $fastaName \
+    --seqFile subset.fa  \
+    --blastParams $params.blastParamsFile \
+    --doNotParse $params.doNotParse \
+    --printSimSeqsFile $params.printSimSeqsFile \
+    --saveAllBlastFiles $params.saveAllBlastFiles \
+    --saveGoodBlastFiles $params.saveGoodBlastFiles \
+    --remMaskedRes $params.adjustMatchLength
   """
 }
 
