@@ -2,7 +2,8 @@ nextflow.enable.dsl=2
 
 process createDatabase {
   output:
-  path 'newdb.fasta.*'
+    path 'newdb.fasta.*'
+
   """
   cp $params.databaseFasta newdb.fasta
   makeblastdb \
@@ -11,17 +12,17 @@ process createDatabase {
   """
 }
 
+
 process blastSimilarity {
   input:
-  val fastaName
-  path 'subset.fa'
-  // Retaining names from the input into db_vch
-  path blastDatabase
+    val fastaName
+    path 'subset.fa'
+    path blastDatabase
 
   output:
-  path 'blastSimilarity.out'
-  path 'blastSimilarity.log'
-  path '*.gz*' optional true
+    path 'blastSimilarity.out'
+    path 'blastSimilarity.log'
+    path '*.gz*' optional true
 
   """
   blastSimilarity.pl \
