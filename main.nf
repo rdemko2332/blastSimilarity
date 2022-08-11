@@ -1,58 +1,54 @@
+#!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-process createDatabase {
-  output:
-    path 'newdb.fasta.*'
 
-  """
-  cp $params.databaseFasta newdb.fasta
-  makeblastdb \
-      -in newdb.fasta \
-      -dbtype $params.databaseType	
-  """
+//---------------------------------------------------------------
+// Param Checking 
+//---------------------------------------------------------------
+
+if(!params.fastaSubsetSize) {
+  throw new Exception("Missing params.fastaSubsetSize")
+}
+
+if(params.seqFile) {
+  seqs = Channel.fromPath( params.seqFile )
+           .splitFasta( by:params.fastaSubsetSize, file:true  )
+}
+else {
+  throw new Exception("Missing params.seqFile")
+}
+
+if (params.preConfiguredDatabase) {
+  if (!params.databaseDir) {
+    throw new Exception("Missing params.databaseDir")
+  }
+  else if(!params.databaseBaseName) {
+    throw new Exception("Missing params.databaseBaseName")
+  }
 }
 
 
-process blastSimilarity {
-  input:
-    val fastaName
-    path 'subset.fa'
-    path blastDatabase
+//--------------------------------------------------------------------------
+// Includes
+//--------------------------------------------------------------------------
 
-  output:
-    path 'blastSimilarity.out'
-    path 'blastSimilarity.log'
-    path '*.gz*' optional true
+include { nonConfiguredDatabase } from './modules/blastSimilarity.nf'
+include { preConfiguredDatabase } from './modules/blastSimilarity.nf'
 
-  """
-  blastSimilarity.pl \
-    --pValCutoff  $params.pValCutoff \
-    --lengthCutoff $params.lengthCutoff \
-    --percentCutoff $params.percentCutoff \
-    --blastProgram $params.blastProgram \
-    --database $fastaName \
-    --seqFile subset.fa  \
-    --blastParams $params.blastParamsFile \
-    --doNotParse $params.doNotParse \
-    --printSimSeqsFile $params.printSimSeqsFile \
-    --saveAllBlastFiles $params.saveAllBlastFiles \
-    --saveGoodBlastFiles $params.saveGoodBlastFiles \
-    --remMaskedRes $params.adjustMatchLength
-  """
-}
+
+//--------------------------------------------------------------------------
+// Main Workflow
+//--------------------------------------------------------------------------
 
 workflow {
-  seqs = Channel.fromPath(params.seqFile).splitFasta( by:params.fastaSubsetSize, file:true  )
+  
   if (!params.preConfiguredDatabase) {
-    database = createDatabase()
-    results = blastSimilarity("newdb.fasta", seqs, database) 
+    nonConfiguredDatabase(seqs)
   }
-  if (params.preConfiguredDatabase) {
-    database = file(params.databaseDir + "/*")
-    results = blastSimilarity(params.databaseBaseName, seqs, database)
+   
+  else if (params.preConfiguredDatabase) {
+    proConfiguredDatabase(seqs)
   }
-  results[0] | collectFile(storeDir: params.outputDir, name: params.dataFile)
-  results[1] | collectFile(storeDir: params.outputDir, name: params.logFile)
-  results[2] | collectFile(storeDir: params.outputDir)
+
 }
 
